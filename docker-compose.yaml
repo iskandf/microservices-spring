@@ -1,0 +1,48 @@
+version: '3'
+services:
+  eureka-server:
+    build:
+      context: ./discovery-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    networks:
+      - spring-net
+
+
+  movie-catalog-service:
+    build:
+      context: ./movie-catalog-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    networks:
+      - spring-net
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://host.docker.internal:8761/eureka/
+
+  movie-info-service:
+    build:
+      context: ./movie-info-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    networks:
+      - spring-net
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://host.docker.internal:8761/eureka/
+
+  ratings-data-service:
+    build:
+      context: ./rating-data-service
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    networks:
+      - spring-net
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://host.docker.internal:8761/eureka/
+
+networks:
+  spring-net:
+    driver: bridge
