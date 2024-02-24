@@ -38,10 +38,23 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8083:8083"
+      - '5005:5005'
     networks:
       - spring-net
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://host.docker.internal:8761/eureka/
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+
+  postgres-db: # New PostgreSQL service
+    image: postgres:latest
+    ports:
+      - "5432:5432"  # Map container port to host port
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: service-database
+    networks:
+      - spring-net
 
 networks:
   spring-net:
