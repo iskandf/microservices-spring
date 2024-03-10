@@ -1,8 +1,12 @@
 package com.example.ratingdataservice.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import com.example.ratingdataservice.models.Rating;
+import com.example.ratingdataservice.dto.RatingDTO;
+import com.example.ratingdataservice.exceptions.MovieIdAlreadyExistsException;
+import com.example.ratingdataservice.mapper.RatingMapper;
+import com.example.ratingdataservice.models.RatingEntity;
 import com.example.ratingdataservice.repositories.RatingRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,29 +17,42 @@ import org.springframework.stereotype.Service;
 public class RatingService {
 	@Autowired
 	private RatingRepository ratingRepository;
+	@Autowired
+	private RatingMapper ratingMapper;
 
-	public Rating getRating(Long movieId) {
-		return ratingRepository.findById(movieId).orElse(null);
+	public RatingDTO getRating(Long movieId) {
+		RatingEntity ratingEntity = ratingRepository.findByMovieId(movieId).orElse(null);
+		return ratingMapper.toRatingDTO(ratingEntity);
 	}
 
-	public Rating saveRating(Rating rating) {
-		return ratingRepository.save(rating);
+	public RatingDTO saveRating(RatingDTO ratingDTO) {
+		RatingEntity ratingEntity = ratingMapper.toRatingEntity(ratingDTO);
+		if (ratingRepository.existsByMovieId(ratingEntity.getMovieId())) {
+			throw new MovieIdAlreadyExistsException("MovieId already exists: " + ratingEntity.getMovieId());
+		}
+		RatingEntity savedRating = ratingRepository.save(ratingEntity);
+		return ratingMapper.toRatingDTO(savedRating);
 	}
 
 	public void deleteRating(Long movieId) {
-		ratingRepository.deleteById(movieId);
+		ratingRepository.deleteByMovieId(movieId);
 	}
 
-	public Rating updateRating(Long movieId, Rating rating) {
+	public RatingDTO updateRating(Long movieId, RatingDTO ratingDTO) {
+		RatingEntity ratingEntity = ratingMapper.toRatingEntity(ratingDTO);
 		if (ratingRepository.existsById(movieId)) {
-			rating.setId(movieId);
-			return ratingRepository.save(rating);
+			ratingEntity.setId(movieId);
+			RatingEntity savedRating = ratingRepository.save(ratingEntity);
+			return ratingMapper.toRatingDTO(savedRating);
 		} else {
 			return null;
 		}
 	}
 
-	public List<Rating> getAllRatings() {
-		return ratingRepository.findAll();
+	public List<RatingDTO> getAllRatings() {
+		List<RatingEntity> all = ratingRepository.findAll();
+		return all.stream()
+				.map(ratingMapper::toRatingDTO)
+				.collect(Collectors.toList());
 	}
 }

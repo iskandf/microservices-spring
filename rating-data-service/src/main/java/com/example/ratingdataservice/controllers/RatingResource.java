@@ -1,6 +1,6 @@
 package com.example.ratingdataservice.controllers;
 
-import com.example.ratingdataservice.models.Rating;
+import com.example.ratingdataservice.dto.RatingDTO;
 import com.example.ratingdataservice.models.UserRating;
 import com.example.ratingdataservice.services.RatingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +23,9 @@ public class RatingResource {
 	@GetMapping("/{movieId}")
 	public ResponseEntity<?> getRating(@PathVariable("movieId") String movieId) {
 		try {
-			Rating rating = ratingService.getRating(Long.parseLong(movieId));
-			if (rating != null) {
-				return ResponseEntity.ok(rating);
+			RatingDTO ratingDTO = ratingService.getRating(Long.parseLong(movieId));
+			if (ratingDTO != null) {
+				return ResponseEntity.ok(ratingDTO);
 			} else {
 				// Rating not found for the given movieId
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Rating not found for movieId: " + movieId);
@@ -40,13 +40,14 @@ public class RatingResource {
 		}
 	}
 
+	//TODO: add userID to rating table to implement this method correctly
 	@GetMapping("/users/{userId}")
 	public UserRating getUserRating(@PathVariable("userId") String userId) {
 		return new UserRating(ratingService.getAllRatings());
 	}
 
 	@PostMapping("/rating/add")
-	public Rating addRating(@RequestBody Rating rating) {
-		return ratingService.saveRating(rating);
+	public RatingDTO addRating(@RequestBody RatingDTO ratingDTO) {
+		return ratingService.saveRating(ratingDTO);
 	}
 }

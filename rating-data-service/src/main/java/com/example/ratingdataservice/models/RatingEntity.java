@@ -17,10 +17,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(name = "ratings")
-public class Rating {
+public class RatingEntity {
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", nullable = false)
 	private Long id;
-	@Column(name = "movie_id", nullable = false)
+	@Column(name = "movie_id", nullable = false, unique = true)
 	private Long movieId;
 	private int rating;
 }
